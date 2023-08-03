@@ -1,9 +1,8 @@
 package dspblocks
 
 import breeze.math.Complex
-import chisel3._
-import chisel3.experimental.FixedPoint
-import chisel3.internal.firrtl.KnownBinaryPoint
+import chisel3.{fromDoubleToLiteral => _, fromIntToBinaryPoint => _, _}
+import fixedpoint._
 import dsptools._
 import dsptools.numbers._
 import spire.math.ConvertableFrom
@@ -42,7 +41,7 @@ object PeekPokePackers {
     case _:DspReal => throw DspException("unsupported")
     case f:FixedPoint => f.binaryPoint match {
       case KnownBinaryPoint(bp) =>
-        val bigIntValue = FixedPoint.toBigInt(value.toDouble(), bp)
+        val bigIntValue = FixedPoint.toBigInt(value.toDouble, bp)
         signedToUnsigned(bigIntValue, gen.getWidth)
       case _ => throw DspException("Must poke FixedPoint with known binary point")
     }
