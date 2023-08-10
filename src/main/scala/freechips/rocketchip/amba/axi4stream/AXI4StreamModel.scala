@@ -242,7 +242,7 @@ case class AXI4StreamTransactionExpect
    }
  }
 
- trait AXI4StreamMasterModel extends PeekPokeTester[Module] {
+ trait AXI4StreamMasterModel[T <: Module] extends PeekPokeTester[T] {
    protected var masters: Seq[AXI4StreamPeekPokeMaster] = Seq()
 
    def resetMaster(port: AXI4StreamBundle): Unit = {
@@ -284,7 +284,7 @@ case class AXI4StreamTransactionExpect
    }
  }
 
- trait AXI4StreamSlaveModel extends PeekPokeTester[Module] {
+ trait AXI4StreamSlaveModel[T <: Module] extends PeekPokeTester[T] {
    protected var slaves: Seq[AXI4StreamPeekPokeSlave] = Seq()
 
    def resetSlave(port: AXI4StreamBundle): Unit = {
@@ -326,8 +326,8 @@ case class AXI4StreamTransactionExpect
    }
  }
 
- trait AXI4StreamModel extends
-   AXI4StreamSlaveModel with AXI4StreamMasterModel {
+ trait AXI4StreamModel[T <: Module] extends
+   AXI4StreamSlaveModel[T] with AXI4StreamMasterModel[T] {
 
    override def step(n: Int): Unit = {
      for (_ <- 0 until n) {

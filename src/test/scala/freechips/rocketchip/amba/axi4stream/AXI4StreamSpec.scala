@@ -1,9 +1,11 @@
 package freechips.rocketchip.amba.axi4stream
 
-import breeze.stats.distributions.Uniform
+import breeze.stats.distributions._
+import Rand.FixedSeed._
 import chisel3._
+import chiseltest.{ChiselScalatestTester, VerilatorBackendAnnotation}
 import chiseltest.iotesters.PeekPokeTester
-import dsptools.tester.MemMasterModel
+import dspblocks.MemMasterModel
 import freechips.rocketchip.amba.axi4._
 import freechips.rocketchip.amba.axi4stream
 import org.chipsalliance.cde.config.Parameters
@@ -11,6 +13,12 @@ import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.tilelink._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+
+trait TMModuleImp {
+  val sinkBundle: AXI4StreamBundle
+  val edge: AXI4StreamEdgeParameters
+  val out: AXI4StreamBundle
+}
 
 class TestModule(val inP: AXI4StreamBundleParameters,
                  outP: AXI4StreamSlaveParameters,
@@ -24,10 +32,10 @@ class TestModule(val inP: AXI4StreamBundleParameters,
     val outNode = AXI4StreamSlaveNode(outP)
     outNode := func(fuzzer, p)
 
-    lazy val module = new LazyModuleImp(this) {
-      val (sinkBundle, edge) = outNode.in.head
+    lazy val module = new LazyModuleImp(this) with TMModuleImp {
+      override val (sinkBundle, edge) = outNode.in.head
 
-      val out = IO(AXI4StreamBundle(sinkBundle.params))
+      override val out = IO(AXI4StreamBundle(sinkBundle.params))
 
       out <> sinkBundle
     }
@@ -46,7 +54,7 @@ class TestModuleTester(c: TestModule,
                        expectTranslator: Seq[AXI4StreamTransaction] => Seq[AXI4StreamTransactionExpect] =
                          { _.map(t => AXI4StreamTransactionExpect(data = Some(t.data))) }
                       )
-  extends PeekPokeTester(c) with AXI4StreamSlaveModel {
+  extends PeekPokeTester(c) with AXI4StreamSlaveModel[TestModule] {
   bindSlave(c.io.out).addExpects(
     expectTranslator(c.transactions)
   )
@@ -55,7 +63,7 @@ class TestModuleTester(c: TestModule,
 
 abstract class StreamMuxTester[D, U, EO, EI, B <: Data](c: StreamMux[D, U, EO, EI, B] with MuxInOuts[D, U, EO, EI, B])
   extends PeekPokeTester(c.module)
-  with AXI4StreamModel with MemMasterModel {
+  with AXI4StreamModel[LazyModuleImp with SMModuleImp] with MemMasterModel {
 
   val inMasters = c.ins.map(in => bindMaster(in.getWrappedValue))
   val outSlaves = c.outIOs.map(out => bindSlave(out.getWrappedValue))
@@ -148,28 +156,28 @@ class TLStreamMuxTester(c: TLStreamMux with TLMuxInOuts) extends StreamMuxTester
   override def memTL: TLBundle = c.registerNode.in.head._1
 }
 
-object StreamMuxTester {
-  def axi4(nInputs: Int, nOutputs: Int): Boolean = {
+class AXI4StreamSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
+
+  def axi4(nInputs: Int, nOutputs: Int): Unit = {
     val lm = LazyModule(new AXI4StreamMux(AddressSet(0x0, 0xFF), beatBytes = 4) with AXI4MuxInOuts {
       def nIn = nInputs
+
       def nOut = nOutputs
     })
-    chiseltest.iotesters.Driver.execute(Array[String]("-tiwv"), () => lm.module) { c =>
-      new AXI4StreamMuxTester(lm)
-    }
+    test(lm.module).runPeekPoke(_ => new AXI4StreamMuxTester(lm))
   }
-  def tl(nInputs: Int, nOutputs: Int): Boolean = {
+
+  def tl(nInputs: Int, nOutputs: Int): Unit = {
     val lm = LazyModule(new TLStreamMux(AddressSet(0x0, 0xFF), beatBytes = 4) with TLMuxInOuts {
       def nIn = nInputs
+
       def nOut = nOutputs
     })
-    chiseltest.iotesters.Driver.execute(Array[String]("-tbn", "verilator"), () => lm.module) { c =>
-      new TLStreamMuxTester(lm)
-    }
+    test(lm.module)
+      .withAnnotations(Seq(VerilatorBackendAnnotation))
+      .runPeekPoke(_ => new TLStreamMuxTester(lm))
   }
-}
 
-class AXI4StreamSpec extends AnyFlatSpec with Matchers {
   behavior of "AXI4 Stream Nodes"
   it should "work with fuzzer and identity" in {
     val inP  = AXI4StreamBundleParameters(n = 2)
@@ -181,9 +189,7 @@ class AXI4StreamSpec extends AnyFlatSpec with Matchers {
 
     }
 
-    chiseltest.iotesters.Driver.execute(Array("-tiwv"), () => new TestModule(inP, outP, func)) {
-      c => new TestModuleTester(c)
-    } should be(true)
+    test(new TestModule(inP, outP, func)).runPeekPoke(new TestModuleTester(_))
   }
 
   it should "work with adapter that shrinks data" in {
@@ -198,9 +204,9 @@ class AXI4StreamSpec extends AnyFlatSpec with Matchers {
       adapter := in
     }
 
-    chiseltest.iotesters.Driver.execute(Array("-tiwv"), () => new TestModule(inP, outP, func)) {
+    test(new TestModule(inP, outP, func)).runPeekPoke {
       c => new TestModuleTester(c, expectTranslator = _.map(t => AXI4StreamTransactionExpect(data = Some(t.data & 0xFF))))
-    } should be(true)
+    }
   }
 
   it should "work with one-to-two adapter" in {
@@ -212,12 +218,12 @@ class AXI4StreamSpec extends AnyFlatSpec with Matchers {
       adapter := in
     }
     def expectTranslator(ts: Seq[AXI4StreamTransaction]): Seq[AXI4StreamTransactionExpect] = {
-      ts.flatMap({ case t => Seq((t.data >> 0) & 0xFF, (t.data >> 8) & 0xFF) })
+      ts.flatMap(t => Seq((t.data >> 0) & 0xFF, (t.data >> 8) & 0xFF))
         .map(t => AXI4StreamTransactionExpect(data = Some(t)))
     }
-    chiseltest.iotesters.Driver.execute(Array("-tiwv"), () => new TestModule(inP, outP, func)) {
+    test(new TestModule(inP, outP, func)).runPeekPoke {
       c => new TestModuleTester(c, expectTranslator = expectTranslator)
-    } should be(true)
+    }
   }
 
   it should "work with two-to-one adapter" in {
@@ -233,9 +239,9 @@ class AXI4StreamSpec extends AnyFlatSpec with Matchers {
         AXI4StreamTransactionExpect(data = Some((r << 16) | l))
       }).toSeq
     }
-    chiseltest.iotesters.Driver.execute(Array("-tiwv"), () => new TestModule(inP, outP, func)) {
+    test(new TestModule(inP, outP, func)).runPeekPoke {
       c => new TestModuleTester(c, expectTranslator = expectTranslator)
-    } should be(true)
+    }
   }
 
   for (i <- 2 until 10) {
@@ -249,10 +255,9 @@ class AXI4StreamSpec extends AnyFlatSpec with Matchers {
       def expectTranslator(ts: Seq[AXI4StreamTransaction]): Seq[AXI4StreamTransactionExpect] = {
         ts.map(t => AXI4StreamTransactionExpect(data = Some(t.data & 0xFFFF)))
       }
-      chiseltest.iotesters.Driver.execute(Array("-tiwv"), () => new TestModule(inP, outP, func)) {
+      test(new TestModule(inP, outP, func)).runPeekPoke {
         c => new TestModuleTester(c, expectTranslator = expectTranslator)
-      } should be(true)
-
+      }
     }
   }
 
@@ -261,7 +266,7 @@ class AXI4StreamSpec extends AnyFlatSpec with Matchers {
   for (ins <- 1 to 5) {
     for (outs <- 1 to 5) {
       it should s"work with $ins masters and $outs slaves" in {
-        StreamMuxTester.axi4(ins, outs) should be (true)
+        axi4(ins, outs)
       }
     }
   }

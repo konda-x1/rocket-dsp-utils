@@ -2,6 +2,7 @@
 
 package freechips.rocketchip.tilelink
 
+import chisel3._
 import chisel3.util.log2Ceil
 
 object TLMasterModel {
@@ -45,7 +46,8 @@ object TLMasterModel {
     sink: BigInt = 0)
 }
 
-trait TLMasterModel extends chiseltest.iotesters.PeekPokeTester[chisel3.Module] with dspblocks.MemMasterModel {
+trait TLMasterModel extends dspblocks.MemMasterModel {
+  self: chiseltest.iotesters.PeekPokeTester[_] =>
   import TLMasterModel._
 
   def memTL: TLBundle

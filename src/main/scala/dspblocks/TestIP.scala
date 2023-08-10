@@ -2,6 +2,7 @@ package dspblocks
 
 import breeze.math.Complex
 import chisel3.{fromDoubleToLiteral => _, fromIntToBinaryPoint => _, _}
+import chiseltest.iotesters.PeekPokeTester
 import fixedpoint._
 import dsptools._
 import dsptools.misc.DspTesterUtilities
@@ -21,6 +22,7 @@ trait MemTester {
 }
 
 trait TLMemTester extends TLMasterModel {
+  self: PeekPokeTester[_] =>
   def resetMem(): Unit = {
     tlReset()
   }
@@ -35,6 +37,7 @@ trait TLMemTester extends TLMasterModel {
 }
 
 trait APBMemTester extends APBMasterModel {
+  self: PeekPokeTester[_] =>
   def resetMem(): Unit = {
     apbReset()
   }
@@ -49,6 +52,7 @@ trait APBMemTester extends APBMasterModel {
 }
 
 trait AXI4MemTester extends AXI4MasterModel {
+  self: PeekPokeTester[_] =>
   def resetMem(): Unit = {
     axiReset()
   }

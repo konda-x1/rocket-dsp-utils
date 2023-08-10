@@ -2,13 +2,14 @@
 
 package dspblocks
 
+import chiseltest._
 import org.chipsalliance.cde.config.Parameters
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.system.BaseConfig
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class DspBlockSpec extends AnyFlatSpec with Matchers {
+class DspBlockSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
   implicit val p: Parameters = (new BaseConfig).toInstance
 
   behavior of "Passthrough"
@@ -16,61 +17,44 @@ class DspBlockSpec extends AnyFlatSpec with Matchers {
   it should "work with AXI4" in {
     val params = PassthroughParams(depth = 5)
     val lazymod = LazyModule(new AXI4Passthrough(params) with AXI4StandaloneBlock)
-    val dut = () => lazymod.module
 
-    chiseltest.iotesters.Driver.execute(Array("-tbn", "firrtl", "-fiwv"), dut) {
-      c => new AXI4PassthroughTester(lazymod)
-    } should be (true)
+    test(lazymod.module).runPeekPoke(_ => new AXI4PassthroughTester(lazymod))
   }
 
   it should "work with APB" in {
     val params = PassthroughParams(depth = 5)
     val lazymod = LazyModule(new APBPassthrough(params) with APBStandaloneBlock)
-    val dut = () => lazymod.module
 
-    chiseltest.iotesters.Driver.execute(Array("-tbn", "firrtl", "-fiwv"), dut) {
-      c => new APBPassthroughTester(lazymod)
-    } should be (true)
+    test(lazymod.module).runPeekPoke(_ => new APBPassthroughTester(lazymod))
   }
 
   it should "work with TL" ignore {
     val params = PassthroughParams(depth = 5)
     val lazymod = LazyModule(new TLPassthrough(params) with TLStandaloneBlock)
-    val dut = () => lazymod.module
 
-    chiseltest.iotesters.Driver.execute(Array("-tbn", "verilator", "-fiwv"), dut) {
-      c => new TLPassthroughTester(lazymod)
-    } should be (true)
+    test(lazymod.module).runPeekPoke(_ => new TLPassthroughTester(lazymod))
   }
 
   behavior of "Byte Rotate"
 
   it should "work with AXI4" in {
     val lazymod = LazyModule(new AXI4ByteRotate() with AXI4StandaloneBlock)
-    val dut = () => lazymod.module
 
-    chiseltest.iotesters.Driver.execute(Array(/*"-tiv",*/ "-tbn", "firrtl", "-fiwv"), dut) {
-      c => new AXI4ByteRotateTester(lazymod)
-    } should be (true)
+    test(lazymod.module).runPeekPoke(_ => new AXI4ByteRotateTester(lazymod))
   }
 
   it should "work with APB" in {
     val lazymod = LazyModule(new APBByteRotate() with APBStandaloneBlock)
-    val dut = () => lazymod.module
 
-    chiseltest.iotesters.Driver.execute(Array("-tbn", "firrtl", "-fiwv"), dut) {
-      c => new APBByteRotateTester(lazymod)
-    } should be (true)
-
+    test(lazymod.module).runPeekPoke(_ => new APBByteRotateTester(lazymod))
   }
 
   it should "work with TL" ignore {
     val lazymod = LazyModule(new TLByteRotate() with TLStandaloneBlock)
-    val dut = () => lazymod.module
 
-    chiseltest.iotesters.Driver.execute(Array("-tbn", "verilator", "-fiwv"), dut) {
-      c => new TLByteRotateTester(lazymod)
-    } should be (true)
+    test(lazymod.module)
+      .withAnnotations(Seq(VerilatorBackendAnnotation))
+      .runPeekPoke(_ => new TLByteRotateTester(lazymod))
   }
 
   behavior of "PTBR Chain"
@@ -82,12 +66,8 @@ class DspBlockSpec extends AnyFlatSpec with Matchers {
         override def csrAddress: AddressSet = AddressSet(0x100, 0xFF)
       })
     )) with APBStandaloneBlock)
-    val dut = () => lazymod.module
 
-    chiseltest.iotesters.Driver.execute(Array("-tbn", "firrtl", "-fiwv"), dut) {
-      c => new APBPTBRTester(lazymod, 0, 0x100)
-    } should be (true)
-
+    test(lazymod.module).runPeekPoke(_ => new APBPTBRTester(lazymod, 0, 0x100))
   }
 
   it should "work with AXI4" in {
@@ -97,11 +77,8 @@ class DspBlockSpec extends AnyFlatSpec with Matchers {
         override def csrAddress: AddressSet = AddressSet(0x100, 0xFF)
       })
     )) with AXI4StandaloneBlock)
-    val dut = () => lazymod.module
 
-    chiseltest.iotesters.Driver.execute(Array("-tbn", "firrtl", "-fiwv"), dut) {
-      c => new AXI4PTBRTester(lazymod, 0, 0x100)
-    } should be (true)
+    test(lazymod.module).runPeekPoke(_ => new AXI4PTBRTester(lazymod, 0, 0x100))
   }
 
   it should "work with TL" ignore {
@@ -111,10 +88,9 @@ class DspBlockSpec extends AnyFlatSpec with Matchers {
         override def csrAddress: AddressSet = AddressSet(0x100, 0xFF)
       })
     )) with TLStandaloneBlock)
-    val dut = () => lazymod.module
 
-    chiseltest.iotesters.Driver.execute(Array("-tbn", "verilator", "-fiwv"), dut) {
-      c => new TLPTBRTester(lazymod, 0, 0x100)
-    } should be (true)
+    test(lazymod.module)
+      .withAnnotations(Seq(VerilatorBackendAnnotation))
+      .runPeekPoke(_ => new TLPTBRTester(lazymod, 0, 0x100))
   }
 }

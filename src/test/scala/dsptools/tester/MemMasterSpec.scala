@@ -26,8 +26,6 @@ trait RegmapExample extends HasRegMap {
   )
 }
 
-
-
 class TLRegmapExample extends TLRegisterRouter(0, "example", Seq("dsptools", "example"), beatBytes = 8, interrupts = 1)(
   new TLRegBundle(null, _))(
     new TLRegModule(null, _, _) with RegmapExample)(Parameters.empty) {
@@ -153,22 +151,20 @@ class MemMasterSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers
   behavior of "MemMaster Tester"
 
   it should "work with TileLink" in {
-    lazy val dut =
+    lazy val dut = LazyModule(new TLRegmapExample)
     // use verilog b/c of verilog blackboxes in TileLink things
-      test(LazyModule(new TLRegmapExample)).withAnnotations(Seq(VerilatorBackendAnnotation)) { dut =>
-        new TLRegmapExampleTester(dut)
-      }
+      test(dut.module)
+        .withAnnotations(Seq(VerilatorBackendAnnotation))
+        .runPeekPoke(_ => new TLRegmapExampleTester(dut))
   }
 
   it should "work with AXI-4" in {
-    test(LazyModule(new AXI4RegmapExample)) { dut =>
-      new AXI4RegmapExampleTester(dut)
-    }
+    lazy val dut = LazyModule(new AXI4RegmapExample)
+    test(dut.module).runPeekPoke(_ => new AXI4RegmapExampleTester(dut))
   }
 
   it should "work with APB" in {
-    test(LazyModule(new APBRegmapExample)) { dut =>
-      new APBRegmapExampleTester(dut)
-    }
+    lazy val dut = LazyModule(new APBRegmapExample)
+    test(dut.module).runPeekPoke(_ => new APBRegmapExampleTester(dut))
   }
 }

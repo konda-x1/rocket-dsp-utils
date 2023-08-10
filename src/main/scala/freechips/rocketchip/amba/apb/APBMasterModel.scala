@@ -2,7 +2,10 @@
 
 package freechips.rocketchip.amba.apb
 
-trait APBMasterModel extends chiseltest.iotesters.PeekPokeTester[chisel3.Module] with dspblocks.MemMasterModel {
+import chisel3._
+
+trait APBMasterModel extends dspblocks.MemMasterModel {
+  self: chiseltest.iotesters.PeekPokeTester[_] =>
   def memAPB: APBBundle
 
   def apbReset(): Unit = {
