@@ -235,8 +235,8 @@ class Jtag2TLMultiplexerSpec extends AnyFlatSpec with Matchers {
     val lazyDut =
       LazyModule(new Jtag2TLMultiplexer(irLength, initialInstruction, beatBytes, addresses, maxBurstNum) {})
 
-    //chisel3.iotesters.Driver.execute(Array("-tiwv", "-tbn", "verilator", "-tivsuv"), () => lazyDut.module) { c =>
-    chisel3.iotesters.Driver.execute(Array("-tbn", "verilator"), () => lazyDut.module) { c =>
+    //chiseltest.iotesters.Driver.execute(Array("-tiwv", "-tbn", "verilator", "-tivsuv"), () => lazyDut.module) { c =>
+    chiseltest.iotesters.Driver.execute(Array("-tbn", "verilator"), () => lazyDut.module) { c =>
       new Jtag2TLMultiplexerTester(lazyDut)
     } should be(true)
   }

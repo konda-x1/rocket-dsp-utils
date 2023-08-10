@@ -1,7 +1,9 @@
 package dsptools.tester
 
 import chisel3._
-import chisel3.iotesters.PeekPokeTester
+import chiseltest.{ChiselScalatestTester, VerilatorBackendAnnotation}
+import chiseltest.iotesters.PeekPokeTester
+import dspblocks.MemMasterModel
 import freechips.rocketchip.amba.apb._
 import freechips.rocketchip.amba.axi4._
 import org.chipsalliance.cde.config.Parameters
@@ -119,7 +121,7 @@ class APBRegmapExample extends APBRegisterRouter(0,
   }
 }
 
-class MemMasterSpec extends AnyFlatSpec with Matchers {
+class MemMasterSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
   abstract class RegmapExampleTester[M <: Module](c: M) extends PeekPokeTester(c) with MemMasterModel {
     memReadWord(0x00) should be (0)
     memReadWord(0x08) should be (1)
@@ -151,24 +153,22 @@ class MemMasterSpec extends AnyFlatSpec with Matchers {
   behavior of "MemMaster Tester"
 
   it should "work with TileLink" in {
-    lazy val dut = LazyModule(new TLRegmapExample)
+    lazy val dut =
     // use verilog b/c of verilog blackboxes in TileLink things
-    assert(chisel3.iotesters.Driver.execute(Array[String]("-tbn", "verilator"), () => dut.module) { c =>
-      new TLRegmapExampleTester(dut)
-    })
+      test(LazyModule(new TLRegmapExample)).withAnnotations(Seq(VerilatorBackendAnnotation)) { dut =>
+        new TLRegmapExampleTester(dut)
+      }
   }
 
   it should "work with AXI-4" in {
-    lazy val dut = LazyModule(new AXI4RegmapExample)
-    assert(chisel3.iotesters.Driver.execute(Array[String](), () => dut.module) { c =>
+    test(LazyModule(new AXI4RegmapExample)) { dut =>
       new AXI4RegmapExampleTester(dut)
-    })
+    }
   }
 
   it should "work with APB" in {
-    lazy val dut = LazyModule(new APBRegmapExample)
-    assert(chisel3.iotesters.Driver.execute(Array[String](), () => dut.module) { c =>
+    test(LazyModule(new APBRegmapExample)) { dut =>
       new APBRegmapExampleTester(dut)
-    })
+    }
   }
 }

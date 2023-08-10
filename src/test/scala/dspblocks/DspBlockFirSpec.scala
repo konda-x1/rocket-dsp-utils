@@ -3,7 +3,7 @@
 package dspblocks
 
 import chisel3._
-import chisel3.iotesters._
+import chiseltest.iotesters._
 import chisel3.util.Cat
 import freechips.rocketchip.amba.axi4._
 import freechips.rocketchip.amba.axi4stream._
@@ -131,7 +131,7 @@ class DspBlockFirSpec extends AnyFreeSpec {
     // invoking testers on lazymodules is a little strange.
     // note that the firblocktester takes a lazymodule, not a module (it calls .module in "extends PeekPokeTester()").
     val lm = LazyModule(new AXI4FIRBlock(1, 8)(Parameters.empty) with AXI4StandaloneBlock)
-    chisel3.iotesters.Driver(() => lm.module) { _ =>
+    chiseltest.iotesters.Driver(() => lm.module) { _ =>
       new AXI4FIRBlockTester(lm)
     }
   }

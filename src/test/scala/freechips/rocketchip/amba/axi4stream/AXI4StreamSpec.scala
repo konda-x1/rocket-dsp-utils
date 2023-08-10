@@ -2,7 +2,7 @@ package freechips.rocketchip.amba.axi4stream
 
 import breeze.stats.distributions.Uniform
 import chisel3._
-import chisel3.iotesters.PeekPokeTester
+import chiseltest.iotesters.PeekPokeTester
 import dsptools.tester.MemMasterModel
 import freechips.rocketchip.amba.axi4._
 import freechips.rocketchip.amba.axi4stream
@@ -154,7 +154,7 @@ object StreamMuxTester {
       def nIn = nInputs
       def nOut = nOutputs
     })
-    chisel3.iotesters.Driver.execute(Array[String]("-tiwv"), () => lm.module) { c =>
+    chiseltest.iotesters.Driver.execute(Array[String]("-tiwv"), () => lm.module) { c =>
       new AXI4StreamMuxTester(lm)
     }
   }
@@ -163,7 +163,7 @@ object StreamMuxTester {
       def nIn = nInputs
       def nOut = nOutputs
     })
-    chisel3.iotesters.Driver.execute(Array[String]("-tbn", "verilator"), () => lm.module) { c =>
+    chiseltest.iotesters.Driver.execute(Array[String]("-tbn", "verilator"), () => lm.module) { c =>
       new TLStreamMuxTester(lm)
     }
   }
@@ -181,7 +181,7 @@ class AXI4StreamSpec extends AnyFlatSpec with Matchers {
 
     }
 
-    chisel3.iotesters.Driver.execute(Array("-tiwv"), () => new TestModule(inP, outP, func)) {
+    chiseltest.iotesters.Driver.execute(Array("-tiwv"), () => new TestModule(inP, outP, func)) {
       c => new TestModuleTester(c)
     } should be(true)
   }
@@ -198,7 +198,7 @@ class AXI4StreamSpec extends AnyFlatSpec with Matchers {
       adapter := in
     }
 
-    chisel3.iotesters.Driver.execute(Array("-tiwv"), () => new TestModule(inP, outP, func)) {
+    chiseltest.iotesters.Driver.execute(Array("-tiwv"), () => new TestModule(inP, outP, func)) {
       c => new TestModuleTester(c, expectTranslator = _.map(t => AXI4StreamTransactionExpect(data = Some(t.data & 0xFF))))
     } should be(true)
   }
@@ -215,7 +215,7 @@ class AXI4StreamSpec extends AnyFlatSpec with Matchers {
       ts.flatMap({ case t => Seq((t.data >> 0) & 0xFF, (t.data >> 8) & 0xFF) })
         .map(t => AXI4StreamTransactionExpect(data = Some(t)))
     }
-    chisel3.iotesters.Driver.execute(Array("-tiwv"), () => new TestModule(inP, outP, func)) {
+    chiseltest.iotesters.Driver.execute(Array("-tiwv"), () => new TestModule(inP, outP, func)) {
       c => new TestModuleTester(c, expectTranslator = expectTranslator)
     } should be(true)
   }
@@ -233,7 +233,7 @@ class AXI4StreamSpec extends AnyFlatSpec with Matchers {
         AXI4StreamTransactionExpect(data = Some((r << 16) | l))
       }).toSeq
     }
-    chisel3.iotesters.Driver.execute(Array("-tiwv"), () => new TestModule(inP, outP, func)) {
+    chiseltest.iotesters.Driver.execute(Array("-tiwv"), () => new TestModule(inP, outP, func)) {
       c => new TestModuleTester(c, expectTranslator = expectTranslator)
     } should be(true)
   }
@@ -249,7 +249,7 @@ class AXI4StreamSpec extends AnyFlatSpec with Matchers {
       def expectTranslator(ts: Seq[AXI4StreamTransaction]): Seq[AXI4StreamTransactionExpect] = {
         ts.map(t => AXI4StreamTransactionExpect(data = Some(t.data & 0xFFFF)))
       }
-      chisel3.iotesters.Driver.execute(Array("-tiwv"), () => new TestModule(inP, outP, func)) {
+      chiseltest.iotesters.Driver.execute(Array("-tiwv"), () => new TestModule(inP, outP, func)) {
         c => new TestModuleTester(c, expectTranslator = expectTranslator)
       } should be(true)
 

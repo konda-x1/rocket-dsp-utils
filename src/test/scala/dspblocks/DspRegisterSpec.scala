@@ -1,7 +1,7 @@
 package dspblocks
 
 import breeze.stats.distributions.Uniform
-import chisel3.iotesters.PeekPokeTester
+import chiseltest.iotesters.PeekPokeTester
 import chisel3.{Bundle, Flipped, Module}
 import freechips.rocketchip.amba.axi4._
 import freechips.rocketchip.amba.axi4stream._
@@ -83,7 +83,7 @@ class DspRegisterSpec extends AnyFlatSpec with Matchers {
     val outP = AXI4StreamSlaveParameters()
     val transactions = AXI4StreamTransaction.defaultSeq(64).zipWithIndex.map({case (t, i) => t.copy(data = i) })
 
-    chisel3.iotesters.Driver(() => new DspRegisterTestModule(inP, outP, 64, transactions) /*, backendType = "verilator"*/) {
+    chiseltest.iotesters.Driver(() => new DspRegisterTestModule(inP, outP, 64, transactions) /*, backendType = "verilator"*/) {
       c => new DspRegisterTestModuleTester(c) {
         axiWriteWord(0, 64)
         axiWriteWord(0x10, 15)

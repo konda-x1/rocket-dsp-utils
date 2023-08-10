@@ -53,7 +53,7 @@ class ShiftRegisterMemSpec extends AnyFlatSpec with Matchers {
   val X = -1
 
   def runTest (dut : (UInt, Bool) => UInt, expected: Seq[Int]) =
-    chisel3.iotesters.Driver.execute(Array(
+    chiseltest.iotesters.Driver.execute(Array(
       "--backend-name", "treadle"), () => new SRMemModule(dut)) {
       c => new SRMemTester(c, testVector, expected)
     } should be (true)

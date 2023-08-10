@@ -18,7 +18,7 @@ class DspBlockSpec extends AnyFlatSpec with Matchers {
     val lazymod = LazyModule(new AXI4Passthrough(params) with AXI4StandaloneBlock)
     val dut = () => lazymod.module
 
-    chisel3.iotesters.Driver.execute(Array("-tbn", "firrtl", "-fiwv"), dut) {
+    chiseltest.iotesters.Driver.execute(Array("-tbn", "firrtl", "-fiwv"), dut) {
       c => new AXI4PassthroughTester(lazymod)
     } should be (true)
   }
@@ -28,7 +28,7 @@ class DspBlockSpec extends AnyFlatSpec with Matchers {
     val lazymod = LazyModule(new APBPassthrough(params) with APBStandaloneBlock)
     val dut = () => lazymod.module
 
-    chisel3.iotesters.Driver.execute(Array("-tbn", "firrtl", "-fiwv"), dut) {
+    chiseltest.iotesters.Driver.execute(Array("-tbn", "firrtl", "-fiwv"), dut) {
       c => new APBPassthroughTester(lazymod)
     } should be (true)
   }
@@ -38,7 +38,7 @@ class DspBlockSpec extends AnyFlatSpec with Matchers {
     val lazymod = LazyModule(new TLPassthrough(params) with TLStandaloneBlock)
     val dut = () => lazymod.module
 
-    chisel3.iotesters.Driver.execute(Array("-tbn", "verilator", "-fiwv"), dut) {
+    chiseltest.iotesters.Driver.execute(Array("-tbn", "verilator", "-fiwv"), dut) {
       c => new TLPassthroughTester(lazymod)
     } should be (true)
   }
@@ -49,7 +49,7 @@ class DspBlockSpec extends AnyFlatSpec with Matchers {
     val lazymod = LazyModule(new AXI4ByteRotate() with AXI4StandaloneBlock)
     val dut = () => lazymod.module
 
-    chisel3.iotesters.Driver.execute(Array(/*"-tiv",*/ "-tbn", "firrtl", "-fiwv"), dut) {
+    chiseltest.iotesters.Driver.execute(Array(/*"-tiv",*/ "-tbn", "firrtl", "-fiwv"), dut) {
       c => new AXI4ByteRotateTester(lazymod)
     } should be (true)
   }
@@ -58,7 +58,7 @@ class DspBlockSpec extends AnyFlatSpec with Matchers {
     val lazymod = LazyModule(new APBByteRotate() with APBStandaloneBlock)
     val dut = () => lazymod.module
 
-    chisel3.iotesters.Driver.execute(Array("-tbn", "firrtl", "-fiwv"), dut) {
+    chiseltest.iotesters.Driver.execute(Array("-tbn", "firrtl", "-fiwv"), dut) {
       c => new APBByteRotateTester(lazymod)
     } should be (true)
 
@@ -68,7 +68,7 @@ class DspBlockSpec extends AnyFlatSpec with Matchers {
     val lazymod = LazyModule(new TLByteRotate() with TLStandaloneBlock)
     val dut = () => lazymod.module
 
-    chisel3.iotesters.Driver.execute(Array("-tbn", "verilator", "-fiwv"), dut) {
+    chiseltest.iotesters.Driver.execute(Array("-tbn", "verilator", "-fiwv"), dut) {
       c => new TLByteRotateTester(lazymod)
     } should be (true)
   }
@@ -84,7 +84,7 @@ class DspBlockSpec extends AnyFlatSpec with Matchers {
     )) with APBStandaloneBlock)
     val dut = () => lazymod.module
 
-    chisel3.iotesters.Driver.execute(Array("-tbn", "firrtl", "-fiwv"), dut) {
+    chiseltest.iotesters.Driver.execute(Array("-tbn", "firrtl", "-fiwv"), dut) {
       c => new APBPTBRTester(lazymod, 0, 0x100)
     } should be (true)
 
@@ -99,7 +99,7 @@ class DspBlockSpec extends AnyFlatSpec with Matchers {
     )) with AXI4StandaloneBlock)
     val dut = () => lazymod.module
 
-    chisel3.iotesters.Driver.execute(Array("-tbn", "firrtl", "-fiwv"), dut) {
+    chiseltest.iotesters.Driver.execute(Array("-tbn", "firrtl", "-fiwv"), dut) {
       c => new AXI4PTBRTester(lazymod, 0, 0x100)
     } should be (true)
   }
@@ -113,7 +113,7 @@ class DspBlockSpec extends AnyFlatSpec with Matchers {
     )) with TLStandaloneBlock)
     val dut = () => lazymod.module
 
-    chisel3.iotesters.Driver.execute(Array("-tbn", "verilator", "-fiwv"), dut) {
+    chiseltest.iotesters.Driver.execute(Array("-tbn", "verilator", "-fiwv"), dut) {
       c => new TLPTBRTester(lazymod, 0, 0x100)
     } should be (true)
   }

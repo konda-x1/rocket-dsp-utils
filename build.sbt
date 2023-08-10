@@ -8,6 +8,13 @@ enablePlugins(GhpagesPlugin)
 
 name := "rocket-dsp-utils"
 
+val silencerVersion = "1.17.13"
+
+ThisBuild / libraryDependencies ++= Seq(
+  compilerPlugin("com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full),
+  "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full
+)
+
 val chiselVersion = "3.6.0"
 
 lazy val chiselSettings = Seq(
@@ -176,5 +183,9 @@ val `rocket-dsp-utils` = (project in file("."))
   .settings(
     chiselSettings,
     commonSettings,
-    libraryDependencies ++= rocketLibDeps.value
+    scalacOptions += s"-P:silencer:sourceRoots=${(baseDirectory.value / "tools").getCanonicalPath}",
+    libraryDependencies ++= rocketLibDeps.value,
+    libraryDependencies ++= Seq(
+      "edu.berkeley.cs" %% "chiseltest" % "0.6.0",
+    )
   )

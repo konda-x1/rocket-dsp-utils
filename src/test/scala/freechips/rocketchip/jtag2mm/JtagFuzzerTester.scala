@@ -26,8 +26,8 @@ class JtagFuzzerSpec extends AnyFlatSpec with Matchers {
   
   it should "Test JTAG Fuzzer" in {
 
-    //chisel3.iotesters.Driver.execute(Array("-tiwv", "-tbn", "verilator", "-tivsuv"), () => dut) { c =>
-    chisel3.iotesters.Driver.execute(Array("-tbn", "verilator"), dut(irLength, beatBytes, numOfTransfers)) { c =>
+    //chiseltest.iotesters.Driver.execute(Array("-tiwv", "-tbn", "verilator", "-tivsuv"), () => dut) { c =>
+    chiseltest.iotesters.Driver.execute(Array("-tbn", "verilator"), dut(irLength, beatBytes, numOfTransfers)) { c =>
       new JtagFuzzerTester(c)
     } should be(true)
   }
