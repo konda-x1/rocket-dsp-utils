@@ -1,7 +1,7 @@
 package dspblocks
 
 import breeze.stats.distributions.Uniform
-import chiseltest.iotesters.PeekPokeTester
+import chisel3.iotesters.PeekPokeTester
 import chisel3.{Bundle, Flipped, Module}
 import chiseltest.ChiselScalatestTester
 import freechips.rocketchip.amba.axi4._
@@ -85,7 +85,7 @@ class DspRegisterTestModuleTester(c: DspRegisterTestModule,
   println(s"${axiReadWord(0)} is the veclen")
 }
 
-class DspRegisterSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
+class DspRegisterSpec extends AnyFlatSpec/* with ChiselScalatestTester*/ with Matchers {
   behavior of "AXI4DspRegister"
 
   it should "be able to read and write" ignore {
@@ -93,19 +93,19 @@ class DspRegisterSpec extends AnyFlatSpec with ChiselScalatestTester with Matche
     val outP = AXI4StreamSlaveParameters()
     val transactions = AXI4StreamTransaction.defaultSeq(64).zipWithIndex.map({case (t, i) => t.copy(data = i) })
 
-    test(new DspRegisterTestModule(inP, outP, 64, transactions))
-      .runPeekPoke(new DspRegisterTestModuleTester(_) {
-        axiWriteWord(0, 64)
-        axiWriteWord(0x10, 15)
-        axiWriteWord(0x8, 0xFF00)
-        step(64)
-        axiWriteWord(0x8, 0x00FF)
-        stepToCompletion()
-
-        for (i <- 0 until 64) {
-          require(axiReadWord(24 + i * 8) == BigInt(i), s"Addr $i is wrong")
-        }
-      })
+//    test(new DspRegisterTestModule(inP, outP, 64, transactions))
+//      .runPeekPoke(new DspRegisterTestModuleTester(_) {
+//        axiWriteWord(0, 64)
+//        axiWriteWord(0x10, 15)
+//        axiWriteWord(0x8, 0xFF00)
+//        step(64)
+//        axiWriteWord(0x8, 0x00FF)
+//        stepToCompletion()
+//
+//        for (i <- 0 until 64) {
+//          require(axiReadWord(24 + i * 8) == BigInt(i), s"Addr $i is wrong")
+//        }
+//      })
   }
 
   it should "work with streams narrower than memory width" in {

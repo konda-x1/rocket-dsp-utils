@@ -2,7 +2,7 @@ package freechips.rocketchip.amba.axi4
 
 import chisel3._
 import chisel3.util.IrrevocableIO
-import chiseltest.iotesters._
+import chisel3.iotesters._
 import dspblocks.MemMasterModel
 import freechips.rocketchip.util.BundleMap
 

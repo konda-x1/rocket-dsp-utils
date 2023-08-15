@@ -15,7 +15,7 @@ import breeze.signal._
 import breeze.signal.support._
 import breeze.signal.support.CanFilter._
 import chisel3._
-import chiseltest.iotesters._
+import chisel3.iotesters._
 import firrtl_interpreter.InterpreterOptions
 import org.scalatest.{FlatSpec, Matchers}
 import scala.util.Random
@@ -155,7 +155,7 @@ class SAMWrapperSpec extends FlatSpec with Matchers {
       val lazyModule = LazyModule(new SAMWrapper)
       lazyModule.module
     }
-    chiseltest.iotesters.Driver.execute(dut, manager) { c => new SAMWrapperTester(c) } should be (true)
+    chisel3.iotesters.Driver.execute(dut, manager) { c => new SAMWrapperTester(c) } should be (true)
   }
 }
 */

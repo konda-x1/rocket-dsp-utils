@@ -1,6 +1,6 @@
 //package freechips.rocketchip.amba.axi4
 //
-//import chiseltest.iotesters.PeekPokeTester
+//import chisel3.iotesters.PeekPokeTester
 //import chisel3.stage.{ChiselGeneratorAnnotation, ChiselStage}
 //import dspblocks.{AXI4DspBlock, AXI4StandaloneBlock, TLDspBlock, TLStandaloneBlock}
 //import freechips.rocketchip.amba.axi4stream._
@@ -190,7 +190,7 @@
 //
 //  it should "simplify complex DMA requests" in {
 //    val dut = () => new DMASimplifier(8, 8, 2, 8)
-//    chiseltest.iotesters.Driver.execute(Array("-tbn", "treadle"), dut) { c => new DMASimplifierTester(c) } should be (true)
+//    chisel3.iotesters.Driver.execute(Array("-tbn", "treadle"), dut) { c => new DMASimplifierTester(c) } should be (true)
 //  }
 //
 //  behavior of "DMA"
@@ -202,7 +202,7 @@
 //    ) with AXI4StandaloneBlock {
 //      lazy val mem = None
 //    })
-//    chiseltest.iotesters.Driver.execute(Array("-fiwv", "-tbn", "verilator", "-tiwv", "-tivsuv"), () => lazyDut.module) {
+//    chisel3.iotesters.Driver.execute(Array("-fiwv", "-tbn", "verilator", "-tiwv", "-tivsuv"), () => lazyDut.module) {
 //      c => new StreamingAXI4DMAWithMemoryTester(lazyDut)
 //    } should be (true)
 //  }
@@ -213,7 +213,7 @@
 //      scratchpadAddress = AddressSet(0x0, 0x1FFFF),
 //      beatBytes = 8,
 //    ) with AXI4StandaloneBlock)
-//    chiseltest.iotesters.Driver.execute(Array("-tiwv", "-tbn", "verilator", "-tivsuv"), () => lazyDut.module) {
+//    chisel3.iotesters.Driver.execute(Array("-tiwv", "-tbn", "verilator", "-tivsuv"), () => lazyDut.module) {
 //      c => new StreamingAXI4DMAWithWithCSRWithScratchpadTester(lazyDut, true)
 //    } should be (true)
 //  }

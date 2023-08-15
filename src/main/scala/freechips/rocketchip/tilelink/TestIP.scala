@@ -47,7 +47,7 @@ object TLMasterModel {
 }
 
 trait TLMasterModel extends dspblocks.MemMasterModel {
-  self: chiseltest.iotesters.PeekPokeTester[_] =>
+  self: chisel3.iotesters.PeekPokeTester[_] =>
   import TLMasterModel._
 
   def memTL: TLBundle

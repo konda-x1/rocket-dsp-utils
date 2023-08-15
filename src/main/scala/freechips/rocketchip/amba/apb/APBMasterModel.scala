@@ -5,7 +5,7 @@ package freechips.rocketchip.amba.apb
 import chisel3._
 
 trait APBMasterModel extends dspblocks.MemMasterModel {
-  self: chiseltest.iotesters.PeekPokeTester[_] =>
+  self: chisel3.iotesters.PeekPokeTester[_] =>
   def memAPB: APBBundle
 
   def apbReset(): Unit = {

@@ -3,7 +3,8 @@
 package dspblocks
 
 import chisel3._
-import chiseltest.iotesters.PeekPokeTester
+//import chisel3.iotesters.PeekPokeTester
+import chisel3.iotesters._
 import freechips.rocketchip.amba.axi4stream._
 import freechips.rocketchip.diplomacy.LazyModuleImp
 import freechips.rocketchip.tilelink.TLBundle

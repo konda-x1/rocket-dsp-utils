@@ -15,7 +15,7 @@ ThisBuild / libraryDependencies ++= Seq(
   "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full
 )
 
-val chiselVersion = "3.6.0"
+val chiselVersion = "3.5.6"
 
 lazy val chiselSettings = Seq(
   libraryDependencies ++= Seq("edu.berkeley.cs" %% "chisel3" % chiselVersion,
@@ -173,7 +173,7 @@ lazy val dsptools = freshProject("dsptools", dsptoolsDir)
       "org.typelevel" %% "spire" % "0.18.0",
       "org.scalanlp" %% "breeze" % "2.1",
       "junit" % "junit" % "4.13.2" % "test",
-      "edu.berkeley.cs" %% "chiseltest" % "0.6.0",
+      "edu.berkeley.cs" %% "chiseltest" % "0.5.6",
       "org.scalatestplus" %% "scalacheck-1-14" % "3.2.2.0" % "test",
     ))
 
@@ -186,6 +186,7 @@ val `rocket-dsp-utils` = (project in file("."))
     scalacOptions += s"-P:silencer:sourceRoots=${(baseDirectory.value / "tools").getCanonicalPath}",
     libraryDependencies ++= rocketLibDeps.value,
     libraryDependencies ++= Seq(
-      "edu.berkeley.cs" %% "chiseltest" % "0.6.0",
+      "edu.berkeley.cs" %% "chisel-iotesters" % "2.5.6",
+      "edu.berkeley.cs" %% "chiseltest" % "0.5.6",
     )
   )

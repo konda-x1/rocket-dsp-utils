@@ -212,7 +212,7 @@ object JustForNow {
     val dut = () => LazyModule(new APBInStreamOutFIFO(0, AddressSet(0x200, 0xff), 8)(p)).module
     chisel3.Driver.execute(Array("-X", "verilog"), dut)
 
-    chiseltest.iotesters.Driver.execute(Array("--backend-name", "firrtl", "-fiwv"), dut) { c=> new tester.MMAPFIFOTester(c) }
+    chisel3.iotesters.Driver.execute(Array("--backend-name", "firrtl", "-fiwv"), dut) { c=> new tester.MMAPFIFOTester(c) }
   }
 }
 */
